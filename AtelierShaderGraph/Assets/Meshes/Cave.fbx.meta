@@ -1,11 +1,8 @@
 fileFormatVersion: 2
-guid: 6576134ed80630a40afa1df2687a449a
+guid: b8e244d09b0c327489a470374af83992
 ModelImporter:
   serializedVersion: 19301
-  internalIDToNameTable:
-  - first:
-      74: 1989289236423521904
-    second: Default Take
+  internalIDToNameTable: []
   externalObjects:
   - first:
       type: UnityEngine:Material
@@ -16,12 +13,22 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: UnderwaterGround
-    second: {fileID: 2100000, guid: f5695efdacf6ff34c8fb72213281e239, type: 2}
+    second: {fileID: 2100000, guid: 7ef656d62d2874746871bdaa1a5aad27, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Walls
     second: {fileID: 2100000, guid: 2f4488162b94bde4ea350abd190dab55, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: WaterWalls
+    second: {fileID: 2100000, guid: 1f1e71ca5a3ad2e44b78f5aa2273dce5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: WetRock
+    second: {fileID: 2100000, guid: 71a39f917116a564c813ec799ddcceb3, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0
@@ -87,7 +94,7 @@ ModelImporter:
     blendShapeNormalImportMode: 1
     normalSmoothingSource: 0
   referencedClips: []
-  importAnimation: 0
+  importAnimation: 1
   humanDescription:
     serializedVersion: 3
     human: []
@@ -106,7 +113,7 @@ ModelImporter:
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   autoGenerateAvatarMappingIfUnspecified: 1
-  animationType: 0
+  animationType: 2
   humanoidOversampling: 1
   avatarSetup: 0
   additionalBone: 0
