@@ -34,7 +34,7 @@ public class PlayerControl : MonoBehaviour
     public float gravity = 1;
     float groundCheckDistance = 0.1f;
 
-    [Header("Attack")]
+    // Attack
     bool attacking;
 
     [Header("Slope")]
@@ -81,6 +81,7 @@ public class PlayerControl : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Space) && !jumping)
             { StartCoroutine(Jump()); }
         }
+        // Attaque, ça marche avec le code du saut.
         if (Input.GetKeyDown(KeyCode.LeftShift) && !attacking)
         { StartCoroutine(Attack()); StartCoroutine(Jump()); }
     }
@@ -126,7 +127,7 @@ public class PlayerControl : MonoBehaviour
     {
         if (jumping || attacking)
         {
-            // On determine l'hauteur en dépendent de combien de temps on appuie sur espace.
+            // On determine l'hauteur en dépendent de combien de temps on appuie sur espace (où shift pour attaque).
             if (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.LeftShift) && jumpStrength < maxJumpStrength)
             {
                 jumpStrength += jumpAcceleration * Time.fixedDeltaTime;
@@ -136,7 +137,7 @@ public class PlayerControl : MonoBehaviour
         }
         else { speed = originalSpeed; } // Reset speed après le saut.
         CheckGroundStatus();
-        // Gravité constante pour s'assurer qu'on descends correctement les pentes et pour quand on tombe.
+        // On applique gravité constante pour s'assurer qu'on descends correctement les pentes et pour quand on tombe.
         movementTotal.y -= gravity * Time.fixedDeltaTime; 
 
     }
@@ -155,7 +156,7 @@ public class PlayerControl : MonoBehaviour
         CheckGroundSlope();
     }
 
-    // Bool pour s'assurer de qu'on saut pas deux fois
+    // Bool pour s'assurer de qu'on saut pas deux fois. Elle determine aussi comment de haut peut être le saut.
     IEnumerator Jump()
     {
         jumping = true;
@@ -163,21 +164,28 @@ public class PlayerControl : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
         jumping = false;
     }
+    // Par rapport le movement l'attaque est similaire a le saut, est nous permet même de faire un double saut.
     IEnumerator Attack()
     {
         attacking = true;
         if (!jumping) { jumpStrength = 0; }
+        // Certaines fontionalités de l'attaque sont géres par l'animation.
+        // L'animation active l'épée est active aussi le collider attaché, 
+        // lequel detect quand il rentre en contact avec un ennemi. Voir le script de EnemyHitBox.
         anim.Play("Attack");
         yield return new WaitForSeconds(1f);
         attacking = false;
     }
 
 
+    // On determine si on est sur une surface plate ou si on va glisser.
     public void CheckGroundSlope()
     {
+        // offset de le raycast determiné par startDistance
         Vector3 origin = new Vector3(transform.position.x, transform.position.y + startDistance, transform.position.z);
 
-
+        // Ce SphereCast detect le normal de la surface sur laquelle on marche. 
+        // On compare plusieurs surfaces si on est en contacte avec plusieurs surfaces.
         bool _evenGround = false;
         RaycastHit[] hits = Physics.SphereCastAll(origin, sphereCastRadius, Vector3.down, sphereCastDistance, castingMask);
         for (int i = 0; i < hits.Length; i++)
@@ -197,6 +205,7 @@ public class PlayerControl : MonoBehaviour
             }
         }
 
+        // Si l'angle est plus grand que le slopeLimit du character controller, le personnage glisse.
         if (groundSlopeAngle > character.slopeLimit)
         {
             Slide(groundSlopeDir, groundSlopeAngle);
@@ -204,34 +213,13 @@ public class PlayerControl : MonoBehaviour
         else { anim.SetFloat(slideHash, 2); }
         _evenGround = false;
 
-        /*
-        RaycastHit hit;
-        // SPHERECAST
-        // "Casts a sphere along a ray and returns detailed information on what was hit."
-        if (Physics.SphereCastAll(origin, sphereCastRadius, Vector3.down, out hit, sphereCastDistance, castingMask))
-        {
-            Debug.Log("Slope");
-            groundSlopeAngle = Vector3.Angle(hit.normal, Vector3.up);
-
-            // Find the vector that represents our slope as well. 
-            //  temp: basically, finds vector moving across hit surface 
-            Vector3 temp = Vector3.Cross(hit.normal, Vector3.down);
-            //  Now use this vector and the hit normal, to find the other vector moving up and down the hit surface
-            groundSlopeDir = Vector3.Cross(temp, hit.normal);
-            if (groundSlopeAngle > character.slopeLimit)
-            {
-                Slide(groundSlopeDir, groundSlopeAngle);
-            }
-        }
-        */
-
     }
 
+    // Glisser. Le code c'est pratiquement le même que celui du movement (Move), avec la difference que la direction vient
+    // du normal de la surface sur laquelle en marche, au lieu de l'input. Ce glissement ç'additionne au movement normal.
     void Slide(Vector3 direction, float angle)
     {
         direction = Vector3.Scale(direction, new Vector3(1, 0, 1)).normalized;
-        // Mouvement directionel, on normalise pour s'assurer de que le vecteur move a une magnitude d'un.
-        // Si il y a pas de movement, on arrête la rotation.
         if (direction != Vector3.zero)
         {
             Quaternion _targetRotation = Quaternion.LookRotation(direction, transform.up);
@@ -246,10 +234,13 @@ public class PlayerControl : MonoBehaviour
         anim.SetFloat(forwardHash, _move.z, 0.1f, Time.deltaTime);
         anim.SetFloat(turnHash, turnAmount, 0.1f, Time.deltaTime);
 
+        // Ici on passe le turnAmount à l'animateur. Si pendant qu'on glisse on est pas en train de tourner beaucoup
+        // ça veut dire qu'on bouge vers la direction de la pente. Ça active une animation speciale.
         if (turnAmount < 0) { turnAmount *= -1; }
         anim.SetFloat(slideHash, turnAmount);
     }
 
+    // Gizmos pour le spherecast
     void OnDrawGizmosSelected()
     {
         if (showDebug)
